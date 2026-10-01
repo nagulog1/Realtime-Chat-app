@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  h1, h2 { text-wrap: balance; }
+  p { text-wrap: pretty; }
+  ::selection { background: rgba(196, 83, 47, 0.18); }
+}
+
+/* Subtle paper grain over the whole page, so flat surfaces don't feel sterile */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Connection status in the profile row: #connState is emptied by chat.js once the
+   socket connects, so an empty element means we are live. */
+#connState:empty::before { content: 'Online'; }
+.conn-dot { background: rgba(29, 27, 24, 0.25); }
+.conn:has(#connState:empty) .conn-dot { background: theme('colors.live'); box-shadow: 0 0 0 3px rgba(78, 138, 92, 0.15); }
+.conn:has(#connState:empty) #connState { color: theme('colors.live'); }
+
+/* Typing indicator dots */
+.typing-dot { animation: blink 1.2s infinite both; }
+.typing-dot:nth-child(2) { animation-delay: .2s; }
+.typing-dot:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%, 80%, 100% { opacity: .2 } 40% { opacity: 1 } }
+
+/* New messages and sidebar rows ease in instead of popping */
+.enter { animation: enter .28s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Skeleton shimmer while a conversation loads */
+.skeleton {
+  background: linear-gradient(90deg, rgba(29,27,24,.06) 0%, rgba(29,27,24,.11) 50%, rgba(29,27,24,.06) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .typing-dot { animation: none; opacity: .6 }
+  .enter, .skeleton { animation: none; }
+}
+
+/* Dialog entrance */
+dialog[open] { animation: enter .22s cubic-bezier(.2, .8, .2, 1) both; }
+
+/* Thin scrollbars */
+#messages, #sidebar nav { scrollbar-width: thin; scrollbar-color: rgba(29,27,24,.15) transparent; }
+#messages::-webkit-scrollbar, #sidebar nav::-webkit-scrollbar { width: 8px }
+#messages::-webkit-scrollbar-thumb, #sidebar nav::-webkit-scrollbar-thumb { background: rgba(29,27,24,.15); border-radius: 8px }

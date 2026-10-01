@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Relay — Chat</title>
+  <meta name="description" content="Relay chat: group rooms and direct messages in real time." />
+  <meta name="theme-color" content="#F7F5F0" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231D1B18'/%3E%3Ccircle cx='22' cy='22' r='4' fill='%23C4532F'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="grain h-[100dvh] overflow-hidden bg-paper font-body text-ink antialiased">
+  <a href="#msgInput" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-ink focus:px-4 focus:py-2 focus:text-paper">Skip to message box</a>
+
+  <div class="flex h-full">
+
+    <!-- Sidebar -->
+    <aside id="sidebar"
+      class="fixed inset-y-0 left-0 z-30 flex w-[18.5rem] -translate-x-full flex-col border-r border-line bg-mist transition-transform duration-300 ease-out lg:static lg:translate-x-0">
+      <div class="flex h-[4.5rem] shrink-0 items-center px-6">
+        <div class="font-display text-[1.9rem] leading-none tracking-tight">relay<span class="text-signal">.</span></div>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto px-3 pb-6" aria-label="Conversations">
+        <div class="mb-1.5 mt-2 flex items-center justify-between pl-3 pr-1">
+          <h2 class="text-[13px] font-medium text-ink/50">Rooms</h2>
+          <button id="newRoomBtn" title="Create a room" aria-label="Create a room"
+            class="grid h-7 w-7 place-items-center rounded-lg text-ink/55 transition hover:bg-white hover:text-ink hover:shadow-soft active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg>
+          </button>
+        </div>
+        <ul id="roomList" class="space-y-0.5"></ul>
+
+        <h2 class="mb-1.5 mt-7 pl-3 text-[13px] font-medium text-ink/50">Direct messages</h2>
+        <ul id="userList" class="space-y-0.5"></ul>
+        <p id="noUsers" class="hidden mx-1 mt-1 rounded-xl border border-dashed border-ink/15 px-3.5 py-3 text-[13px] leading-relaxed text-ink/55">
+          Nobody else is here yet. Open the app in a second browser and create another account to try a private chat.
+        </p>
+      </nav>
+
+      <div class="conn mx-3 mb-3 flex shrink-0 items-center gap-3 rounded-2xl bg-white/70 px-3 py-2.5 ring-1 ring-line/80">
+        <div id="meAvatar" class="grid h-9 w-9 place-items-center rounded-[10px] text-sm font-semibold"></div>
+        <div class="min-w-0 flex-1">
+          <div id="meName" class="truncate text-[14px] font-medium"></div>
+          <div class="flex items-center gap-1.5 text-xs text-ink/50">
+            <span class="conn-dot h-1.5 w-1.5 rounded-full transition"></span>
+            <span id="connState" aria-live="polite">Connecting…</span>
+          </div>
+        </div>
+        <button id="logoutBtn"
+          class="rounded-lg px-2.5 py-1.5 text-[13px] text-ink/55 transition hover:bg-mist hover:text-ink active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal">Log out</button>
+      </div>
+    </aside>
+    <div id="backdrop" class="fixed inset-0 z-20 hidden bg-ink/30 backdrop-blur-[2px] lg:hidden"></div>
+
+    <!-- Main chat area -->
+    <main class="flex min-w-0 flex-1 flex-col">
+      <header class="flex h-[4.5rem] shrink-0 items-center gap-3 border-b border-line bg-paper/85 px-4 backdrop-blur sm:px-8">
+        <button id="menuBtn" aria-label="Open conversations"
+          class="-ml-2 rounded-lg p-2 transition hover:bg-mist active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal lg:hidden">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 6h14M3 10h9M3 14h14"/></svg>
+        </button>
+        <div class="min-w-0">
+          <h1 id="chatTitle" class="truncate font-display text-[1.75rem] leading-tight tracking-tight">Select a conversation</h1>
+          <p id="chatSubtitle" class="-mt-0.5 truncate text-[13px] text-ink/50"></p>
+        </div>
+      </header>
+
+      <section id="messages" class="flex-1 overflow-y-auto px-4 py-6 sm:px-8 xl:px-[max(2rem,calc((100%-60rem)/2))]" aria-live="polite">
+        <div id="emptyState" class="grid h-full place-items-center text-center">
+          <div class="max-w-xs">
+            <p class="font-display text-4xl italic leading-tight text-ink/80">Pick a room or a person.</p>
+            <p class="mt-3 text-[15px] text-ink/50">Your rooms and direct messages are in the sidebar.</p>
+          </div>
+        </div>
+      </section>
+
+      <div id="typing" class="flex h-6 items-center gap-2 px-4 text-[13px] text-ink/50 sm:px-8 xl:px-[max(2rem,calc((100%-60rem)/2))]"></div>
+
+      <div class="shrink-0 px-4 pb-4 pt-1 sm:px-8 sm:pb-6 xl:px-[max(2rem,calc((100%-60rem)/2))]">
+        <form id="composer" autocomplete="off"
+          class="flex items-center gap-2 rounded-2xl bg-white p-1.5 pl-2 shadow-soft ring-1 ring-line transition focus-within:ring-2 focus-within:ring-signal/40">
+          <label for="msgInput" class="sr-only">Message</label>
+          <input id="msgInput" maxlength="1000" disabled placeholder="Select a conversation to start typing"
+            class="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-[15px] outline-none placeholder:text-ink/35 disabled:cursor-not-allowed" />
+          <button id="sendBtn" type="submit" disabled aria-label="Send message"
+            class="flex items-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-paper transition hover:bg-ink/90 active:scale-[0.97] disabled:bg-ink/15 disabled:text-ink/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal">
+            <span class="hidden sm:inline">Send</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+          </button>
+        </form>
+        <p class="mt-2 hidden px-1 font-mono text-[11px] text-ink/35 sm:block">Enter to send</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- New room dialog -->
+  <dialog id="roomDialog" class="w-[min(92vw,440px)] rounded-[22px] bg-paper p-0 text-ink shadow-lift ring-1 ring-line backdrop:bg-ink/35 backdrop:backdrop-blur-[2px]">
+    <form id="roomForm" method="dialog" class="p-7">
+      <h2 class="font-display text-[2rem] leading-none tracking-tight">New room</h2>
+      <p class="mt-2 text-sm text-ink/55">Everyone can see and join it.</p>
+      <label for="roomName" class="mb-1.5 mt-6 block text-sm font-medium">Room name</label>
+      <input id="roomName" maxlength="30" required placeholder="design-review"
+        class="w-full rounded-xl border border-line bg-white px-4 py-2.5 outline-none transition placeholder:text-ink/30 focus:border-signal focus:ring-4 focus:ring-signal/15" />
+      <label for="roomDesc" class="mb-1.5 mt-4 block text-sm font-medium">Description <span class="font-normal text-ink/40">(optional)</span></label>
+      <input id="roomDesc" maxlength="120" placeholder="What is this room for?"
+        class="w-full rounded-xl border border-line bg-white px-4 py-2.5 outline-none transition placeholder:text-ink/30 focus:border-signal focus:ring-4 focus:ring-signal/15" />
+      <p id="roomError" role="alert" class="hidden mt-3 text-sm text-danger"></p>
+      <div class="mt-7 flex justify-end gap-2">
+        <button type="button" id="cancelRoom" class="rounded-xl px-4 py-2.5 text-sm text-ink/65 transition hover:bg-mist hover:text-ink active:scale-[0.97]">Cancel</button>
+        <button type="submit" class="rounded-xl bg-ink px-5 py-2.5 text-sm font-medium text-paper transition hover:bg-ink/90 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal">Create room</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" class="hidden fixed bottom-28 left-1/2 z-40 -translate-x-1/2 rounded-xl bg-ink px-4 py-2.5 text-sm text-paper shadow-lift"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/chat.js"></script>
+</body>
+</html>

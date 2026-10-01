@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Secrets: never commit real credentials (use .env.example as the template)
+.env
+.env.*
+!.env.example
+
+# Logs and tool output
+*.log
+npm-debug.log*
+.playwright-mcp/
+coverage/
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
