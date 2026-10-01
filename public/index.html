@@ -11,36 +11,57 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/styles.css" />
+  <script>
+    // Enable entrance animations before first paint (skipped for reduced-motion users,
+    // and if this never runs the page is simply shown without animation)
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('motion');
+  </script>
 </head>
-<body class="grain min-h-[100dvh] bg-paper font-body text-ink antialiased">
+<body class="grain min-h-[100dvh] overflow-x-hidden bg-paper font-body text-ink antialiased">
   <a href="#username" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-ink focus:px-4 focus:py-2 focus:text-paper">Skip to sign in</a>
 
-  <div class="mx-auto flex min-h-[100dvh] max-w-6xl flex-col px-6 sm:px-10">
+  <!-- Ambient glow, drifting slowly behind everything -->
+  <div class="orb orb-a" aria-hidden="true"></div>
+  <div class="orb orb-b" aria-hidden="true"></div>
+
+  <div class="relative z-10 mx-auto flex min-h-[100dvh] max-w-6xl flex-col px-6 sm:px-10">
     <header class="flex items-center justify-between py-7">
-      <div class="font-display text-[1.9rem] leading-none tracking-tight">relay<span class="text-signal">.</span></div>
-      <span class="hidden sm:inline font-mono text-xs text-ink/45">rooms · direct messages · history</span>
+      <div data-reveal class="font-display text-[1.9rem] leading-none tracking-tight">relay<span class="text-signal">.</span></div>
     </header>
 
     <main class="grid flex-1 items-center gap-14 pb-16 pt-6 lg:grid-cols-12 lg:gap-10 lg:pb-24">
       <!-- Left: pitch + live sample conversation -->
       <section class="hidden lg:block lg:col-span-7 lg:pr-10">
-        <h1 class="font-display text-[4.5rem] leading-[0.95] tracking-[-0.02em]">
-          Talk it through,<br /><em class="text-ink/55">right as it happens.</em>
+        <h1 class="font-display text-[4.5rem] leading-[0.95] tracking-[-0.02em]" aria-label="Talk it through, right as it happens.">
+          <span aria-hidden="true">
+            <span class="word-mask"><span class="word" style="--i:0">Talk</span></span>
+            <span class="word-mask"><span class="word" style="--i:1">it</span></span>
+            <span class="word-mask"><span class="word" style="--i:2">through,</span></span><br />
+            <em class="text-ink/55">
+              <span class="word-mask"><span class="word" style="--i:3">right</span></span>
+              <span class="word-mask"><span class="word" style="--i:4">as</span></span>
+              <span class="word-mask"><span class="word" style="--i:5">it</span></span>
+              <span class="word-mask"><span class="word" style="--i:6">happens.</span></span>
+            </em>
+          </span>
         </h1>
-        <p class="mt-7 max-w-[46ch] text-lg leading-relaxed text-ink/65">
+        <p data-reveal style="--d:620ms" class="mt-7 max-w-[46ch] text-lg leading-relaxed text-ink/65">
           Open rooms for the whole group, private threads for one-on-one, and the full history waiting when you come back.
         </p>
 
-        <figure class="relative mt-12 max-w-md">
+        <figure id="demoCard" class="tilt card-enter relative mt-12 max-w-md">
           <div class="absolute -inset-x-4 -inset-y-5 -rotate-1 rounded-[28px] bg-mist" aria-hidden="true"></div>
-          <div class="relative rounded-[22px] bg-white p-5 shadow-lift ring-1 ring-line/70">
-            <div class="mb-4 flex items-center justify-between border-b border-line pb-3">
-              <span class="font-display text-xl"># launch-week</span>
-              <span class="flex items-center gap-1.5 font-mono text-[11px] text-live">
-                <span class="h-1.5 w-1.5 rounded-full bg-live"></span>3 online
-              </span>
+          <div class="tilt-inner relative rounded-[22px] bg-white shadow-lift ring-1 ring-line/70">
+            <div class="sheen" aria-hidden="true"></div>
+            <div class="tilt-depth p-5">
+              <div class="mb-4 flex items-center justify-between border-b border-line pb-3">
+                <span class="font-display text-xl"># launch-week</span>
+                <span class="flex items-center gap-1.5 font-mono text-[11px] text-live">
+                  <span class="live-dot h-1.5 w-1.5 rounded-full bg-live"></span>3 online
+                </span>
+              </div>
+              <div id="demo" class="flex h-[232px] flex-col justify-end gap-2.5 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_28px)]" aria-hidden="true"></div>
             </div>
-            <div id="demo" class="min-h-[168px] space-y-2.5" aria-hidden="true"></div>
           </div>
         </figure>
       </section>
@@ -48,40 +69,48 @@
       <!-- Right: auth form -->
       <section class="w-full lg:col-span-5 lg:border-l lg:border-line lg:pl-14">
         <div class="mx-auto w-full max-w-sm lg:mx-0">
-          <h2 id="formTitle" class="font-display text-[2.6rem] leading-none tracking-tight">Welcome back</h2>
-          <p id="formHint" class="mt-3 text-ink/60">Sign in to pick up where you left off.</p>
+          <h2 id="formTitle" data-reveal style="--d:260ms" class="font-display text-[2.6rem] leading-none tracking-tight">Welcome back</h2>
+          <p id="formHint" data-reveal style="--d:340ms" class="mt-3 text-ink/60">Sign in to pick up where you left off.</p>
 
           <form id="authForm" class="mt-9 space-y-5" novalidate>
-            <div>
+            <div class="field" data-reveal style="--d:420ms">
               <label for="username" class="mb-1.5 block text-sm font-medium">Username</label>
               <input id="username" name="username" autocomplete="username" required spellcheck="false"
-                class="w-full rounded-xl border border-line bg-white px-4 py-3 shadow-soft outline-none transition placeholder:text-ink/30 hover:border-ink/20 focus:border-signal focus:ring-4 focus:ring-signal/15"
-                placeholder="e.g. meera_k" />
+                class="w-full rounded-xl border border-line bg-white px-4 py-3 shadow-soft outline-none transition duration-300 hover:border-ink/20 focus:border-signal focus:ring-4 focus:ring-signal/15" />
             </div>
-            <div>
+            <div class="field" data-reveal style="--d:500ms">
               <label for="password" class="mb-1.5 block text-sm font-medium">Password</label>
-              <input id="password" name="password" type="password" autocomplete="current-password" required
-                class="w-full rounded-xl border border-line bg-white px-4 py-3 shadow-soft outline-none transition hover:border-ink/20 focus:border-signal focus:ring-4 focus:ring-signal/15" />
+              <div class="relative">
+                <input id="password" name="password" type="password" autocomplete="current-password" required
+                  class="w-full rounded-xl border border-line bg-white py-3 pl-4 pr-20 shadow-soft outline-none transition duration-300 hover:border-ink/20 focus:border-signal focus:ring-4 focus:ring-signal/15" />
+                <button id="togglePw" type="button" aria-controls="password" aria-pressed="false"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2.5 py-1.5 font-mono text-[11px] text-ink/50 transition duration-300 hover:bg-mist hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal">Show</button>
+              </div>
               <p id="pwRule" class="hidden mt-1.5 font-mono text-[11px] text-ink/45">At least 6 characters.</p>
             </div>
 
             <p id="error" role="alert" class="hidden rounded-xl border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-danger"></p>
 
-            <button id="submitBtn" type="submit"
-              class="group flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-3.5 font-medium text-paper shadow-soft transition hover:bg-ink/90 active:scale-[0.985] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal">
-              Sign in
-            </button>
+            <div data-reveal style="--d:580ms">
+              <button id="submitBtn" type="submit"
+                class="btn-kinetic flex w-full items-center justify-between rounded-xl bg-ink py-2 pl-5 pr-2 font-medium text-paper shadow-soft transition duration-300 hover:bg-ink/90 disabled:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal">
+                <span id="submitLabel">Sign in</span>
+                <span class="btn-icon grid h-9 w-9 place-items-center rounded-lg bg-paper/10" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+                </span>
+              </button>
+            </div>
           </form>
 
-          <p class="mt-7 text-sm text-ink/60">
+          <p data-reveal style="--d:660ms" class="mt-7 text-sm text-ink/60">
             <span id="switchText">New here?</span>
-            <button id="switchMode" type="button" class="font-medium text-signal underline decoration-signal/30 underline-offset-4 transition hover:decoration-signal focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal rounded">Create an account</button>
+            <button id="switchMode" type="button" class="rounded font-medium text-signal underline decoration-signal/30 underline-offset-4 transition duration-300 hover:decoration-signal focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal">Create an account</button>
           </p>
         </div>
       </section>
     </main>
 
-    <footer class="flex flex-wrap items-center justify-between gap-2 border-t border-line py-5 font-mono text-[11px] text-ink/40">
+    <footer data-reveal style="--d:900ms" class="flex flex-wrap items-center justify-between gap-2 border-t border-line py-5 font-mono text-[11px] text-ink/40">
       <span>Node.js · Socket.IO · MongoDB</span>
       <span>Messages are delivered live and kept in your history.</span>
     </footer>
